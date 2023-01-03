@@ -1,7 +1,44 @@
 <script>
 	import Header from './Header.svelte';
 	import './styles.css';
+  import { onMount } from 'svelte'
+  import { pwaInfo } from 'virtual:pwa-info'
+  
+  onMount(async () => {
+    if (pwaInfo) {
+      // Auto Update
+      const { registerSW } = await import('virtual:pwa-register')
+      registerSW({
+        immediate: true,
+        onRegistered(r) {
+          // uncomment following code if you want check for updates
+          // r && setInterval(() => {
+          //    console.log('Checking for sw update')
+          //    r.update()
+          // }, 20000 /* 20s for testing purposes */)
+          console.log(`SW Registered: ${r}`)
+        },
+        onRegisterError(error) {
+          console.log('SW registration error', error)
+        }
+      })
+
+      // Prompt for update, replace above with this.
+      // pwaInfo && (ReloadPrompt = (await import('$lib/ReloadPrompt.svelte')).default)
+    }
+  })
+  
+  $: webManifest = pwaInfo ? pwaInfo.webManifest.linkTag : ''
+
 </script>
+
+<svelte:head>
+    {@html webManifest}
+</svelte:head>
+<!-- Add if using prompt for update -->
+<!-- {#if ReloadPrompt} -->
+<!--   <svelte:component this={ReloadPrompt} /> -->
+<!-- {/if} -->
 
 <div class="app">
 	<Header />
